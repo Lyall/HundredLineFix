@@ -196,20 +196,20 @@ void Resolution()
     }
 
     // Resolution
-    std::uint8_t* ResolutionScanResult = Memory::PatternScan(exeModule, "45 0F ?? ?? 8B ?? 8B ?? 48 8B ?? ?? ?? 48 8B ?? ?? ?? 48 8B ?? ?? ?? 48 83 ?? ?? 41 ?? E9 ?? ?? ?? ??");
+    std::uint8_t* ResolutionScanResult = Memory::PatternScan(exeModule, "8B ?? 45 0F ?? ?? 8B ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B ??");
     if (ResolutionScanResult) {
         spdlog::info("Resolution: Address is {:s}+{:x}", sExeName.c_str(), ResolutionScanResult - reinterpret_cast<std::uint8_t*>(exeModule));
         static SafetyHookMid ResolutionMidHook{};
-        ResolutionMidHook = safetyhook::create_mid(ResolutionScanResult + 0x4,
+        ResolutionMidHook = safetyhook::create_mid(ResolutionScanResult,
             [](SafetyHookContext& ctx) {
                 // Apply custom resolution
                 if (bCustomResolution) {
-                    ctx.rsi = iCustomResX;
+                    ctx.rax = iCustomResX;
                     ctx.rbx = iCustomResY;
                 }
 
                 // Get current resolution
-                int iResX = static_cast<int>(ctx.rsi);
+                int iResX = static_cast<int>(ctx.rax);
                 int iResY = static_cast<int>(ctx.rbx);
   
                 // Log current resolution
